@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Placement Analytics | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+
+    <main class="login-card">
+
+        <section class="login-illustration">
+            <div class="illustration-circle"></div>
+            <div class="chart-decoration">
+                <span></span><span></span><span></span><span></span>
+            </div>
+
+            <div class="student-illustration">🎓</div>
+            <h2>Build Your Future</h2>
+            <p>Discover skills, placement trends and career opportunities.</p>
+
+            <div class="login-stats">
+                <span> Placement Insights</span>
+                <span> Skill Analysis</span>
+                <span> Career Growth</span>
+            </div>
+        </section>
+
+        <section class="login-form-section">
+           
+
+            <p class="eyebrow">STUDENT PLACEMENT ANALYTICS</p>
+            <h1>Welcome back!</h1>
+            <p class="subtitle">Sign in to access your placement dashboard.</p>
+
+            {% if error %}
+                <p class="login-error" role="alert">{{ error }}</p>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <span>👤</span>
+                    <input id="username" name="username"
+                           type="text" placeholder="Enter your username"
+                           autocomplete="username" required>
+                </div>
+
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <span>🔒</span>
+                    <input id="password" name="password"
+                           type="password" placeholder="Enter your password"
+                           autocomplete="current-password" required>
+                </div>
+
+                <button class="login-button" type="submit">SIGN IN →</button>
+            </form>
+             <p class="login-footer">
+                    Don't have an account?
+                    <a href="{{ url_for('register') }}">Create account</a>
+            </p>
+            
+        </section>
+
+    </main>
+
+</body>
+</html>

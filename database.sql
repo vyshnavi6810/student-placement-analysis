@@ -53,4 +53,39 @@ CREATE TABLE placements (
 );
 
 
+
+
+
+
+CREATE TABLE IF NOT EXISTS student_accounts (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS placement_submissions (
+    submission_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    department VARCHAR(100) NOT NULL,
+    skills TEXT,
+    placement_status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+    company VARCHAR(150),
+    job_role VARCHAR(150),
+    package_lpa DECIMAL(8,2),
+    verification_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    verified_at TIMESTAMP NULL,
+    verified_by VARCHAR(50),
+    FOREIGN KEY (user_id)
+        REFERENCES student_accounts(user_id)
+        ON DELETE CASCADE
+);
+
+
 SHOW TABLES;
+
+
+

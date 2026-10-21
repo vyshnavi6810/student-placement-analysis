@@ -5,124 +5,338 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Placement Analytics</title>
-    <link rel="stylesheet" href="/static/style.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='dashboard.css') }}">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">P</div>
-            <span>Placement Analytics</span>
+
+<main class="dashboard-page">
+
+    <header class="topbar">
+        <div>
+            <span class="eyebrow">STUDENT PLACEMENT DATA ANALYSIS</span>
+            
+            
         </div>
 
-        <p class="nav-label">NAVIGATION</p>
-        <a class="nav-item active" href="/">▦ &nbsp; Dashboard</a>
-        <a class="nav-item" href="#overview">▤ &nbsp; Placement Stats</a>
-        <a class="nav-item" href="#departments">▥ &nbsp; Departments</a>
-        <a class="nav-item" href="#skills">◇ &nbsp; Skills Analysis</a>
-        <a class="nav-item" href="#packages">₹ &nbsp; Package Analysis</a>
+        <div class="top-actions">
+            <button class="btn btn-light" onclick="loadDashboard()">
+                ↻ Refresh
+            </button>
+            <a class="btn btn-yellow"
+               href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </header>
 
-        <div class="sidebar-footer">Student Placement<br>Data Analysis System</div>
-    </aside>
-
-    <main class="main-content">
-        <header class="topbar">
-            <div class="breadcrumb">Home <span>›</span> Dashboard</div>
-            <span class="status"><span class="dot"></span> Analytics Dashboard</span>
-        </header>
-
-        <section class="page-heading" id="overview">
+    <section class="section">
+        <div class="section-heading">
             <div>
-                <p class="eyebrow">PLACEMENT INSIGHTS</p>
-                <h1>Placement Statistics</h1>
-                <p class="subtitle">Analyze placement outcomes, skills and salary packages.</p>
+                <h2>Placement Overview</h2>
+                <p>Summary of student placement performance.</p>
             </div>
-            <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh Data</button>
-        </section>
+        </div>
 
-        <section class="stats-grid">
-            <article class="stat-card">
-                <div class="stat-top"><span>Total Eligible Students</span><span class="stat-icon blue">♙</span></div>
-                <h2 id="eligible">—</h2>
-                <p>Eligible for placement</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top"><span>Total Placements</span><span class="stat-icon teal">✓</span></div>
-                <h2 id="placed">—</h2>
-                <p>Students placed</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top"><span>Placement Rate</span><span class="stat-icon purple">↗</span></div>
-                <h2 id="rate">—</h2>
-                <p>Among eligible students</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top"><span>Mean Package</span><span class="stat-icon orange">₹</span></div>
-                <h2 id="mean">—</h2>
-                <p>Package in LPA</p>
-            </article>
-        </section>
-
-        <section class="chart-grid">
-            <article class="panel" id="departments">
-                <div class="panel-heading">
-                    <div><h3>Department Comparison</h3><p>Placement rate by department</p></div>
-                    <span class="panel-menu">•••</span>
+        <div class="summary-grid">
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-icon">♙</span>
+                    <span class="card-label">Eligible Students</span>
                 </div>
-                <div class="chart-wrap"><canvas id="departmentChart"></canvas></div>
+                <div class="card-value" id="eligible">--</div>
+                <p class="card-note">Eligible for placement</p>
             </article>
 
-            <article class="panel" id="packages">
-                <div class="panel-heading">
-                    <div><h3>Package Distribution</h3><p>Mean versus median package</p></div>
-                    <span class="panel-menu">•••</span>
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-icon">✓</span>
+                    <span class="card-label">Students Placed</span>
                 </div>
-                <div class="chart-wrap"><canvas id="packageChart"></canvas></div>
+                <div class="card-value" id="placed">--</div>
+                <p class="card-note">Successful placements</p>
             </article>
 
-            <article class="panel" id="skills">
-                <div class="panel-heading">
-                    <div><h3>In-Demand Skills</h3><p>Number of students per skill</p></div>
-                    <span class="panel-menu">•••</span>
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-icon">%</span>
+                    <span class="card-label">Placement Rate</span>
                 </div>
-                <div class="chart-wrap"><canvas id="skillChart"></canvas></div>
-            </article>
-        </section>
-
-        <section class="bottom-grid">
-            <article class="panel">
-                <div class="panel-heading">
-                    <div><h3>Department Report</h3><p>Eligible students and placement outcomes</p></div>
-                    <button class="download-btn" onclick="downloadCSV('department')">↓ CSV</button>
-                </div>
-                <div class="table-scroll">
-                    <table>
-                        <thead><tr><th>Department</th><th>Eligible</th><th>Placed</th><th>Rate</th></tr></thead>
-                        <tbody id="departmentTable"><tr><td colspan="4">Loading data...</td></tr></tbody>
-                    </table>
-                </div>
+                <div class="card-value" id="rate">--</div>
+                <p class="card-note">Overall placement percentage</p>
             </article>
 
-            <article class="panel">
-                <div class="panel-heading">
-                    <div><h3>Skill Summary</h3><p>Student skills overview</p></div>
-                    <button class="download-btn" onclick="downloadCSV('skills')">↓ CSV</button>
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-icon">₹</span>
+                    <span class="card-label">Average Package</span>
                 </div>
-                <div class="table-scroll">
-                    <table>
-                        <thead><tr><th>Skill</th><th>Students</th></tr></thead>
-                        <tbody id="skillTable"><tr><td colspan="2">Loading data...</td></tr></tbody>
-                    </table>
-                </div>
+                <div class="card-value" id="mean">--</div>
+                <p class="card-note">Average package in LPA</p>
             </article>
-        </section>
+        </div>
+    </section>
 
-        <p class="page-footer">Student Placement Data Analysis System · Live database reports</p>
-    </main>
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Quick Navigation</h2>
+                
+            </div>
+        </div>
 
-    <script src="/static/script.js"></script>
+        <div class="feature-grid">
+            <button class="feature-card"
+                    onclick="showSection('placementsSection', this)">
+                <span class="feature-icon">▥</span>
+                <strong>Placement Analysis</strong>
+                <span>View department-wise placement statistics.</span>
+                <span class="feature-link">View placements →</span>
+            </button>
+
+            <button class="feature-card"
+                    onclick="showSection('skillsSection', this)">
+                <span class="feature-icon">✦</span>
+                <strong>Skills Analysis</strong>
+                <span>Explore the technical skills in the dataset.</span>
+                <span class="feature-link">View skills →</span>
+            </button>
+
+            <button class="feature-card"
+                    onclick="showSection('packagesSection', this)">
+                <span class="feature-icon">₹</span>
+                <strong>Package Analysis</strong>
+                <span>Compare average and median packages.</span>
+                <span class="feature-link">View packages →</span>
+            </button>
+
+            <button class="feature-card"
+                    onclick="showSection('reportsSection', this)">
+                <span class="feature-icon">▤</span>
+                <strong>Placement Reports</strong>
+                <span>View tables and export available reports.</span>
+                <span class="feature-link">View reports →</span>
+            </button>
+        </div>
+    </section>
+
+    <div id="dashboardMessage" class="message" role="status"></div>
+
+    <!-- PLACEMENTS -->
+    <section id="placementsSection" class="content-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Placement Analysis</h2>
+                <p>Compare placement performance across departments.</p>
+            </div>
+            <div class="panel-actions">
+                <button class="btn btn-yellow"
+                        onclick="renderDepartmentChart()">
+                    Show Chart
+                </button>
+                <button class="btn btn-light"
+                        onclick="downloadCSV('department')">
+                    Download CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="departmentChart"></canvas>
+        </div>
+
+        <h3 class="table-heading">Department Placement Details</h3>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Eligible Students</th>
+                        <th>Placed Students</th>
+                        <th>Placement Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="departmentTable">
+                    <tr><td colspan="4">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skillsSection" class="content-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Skills Analysis</h2>
+                <p>Understand the skills represented in the dataset.</p>
+            </div>
+            <div class="panel-actions">
+                <button class="btn btn-yellow"
+                        onclick="renderSkillChart()">
+                    Show Chart
+                </button>
+                <button class="btn btn-light"
+                        onclick="downloadCSV('skill')">
+                    Download CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="skillChart"></canvas>
+        </div>
+
+        <h3 class="table-heading">Student Skills Details</h3>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Skill</th>
+                        <th>Student Count</th>
+                    </tr>
+                </thead>
+                <tbody id="skillTable">
+                    <tr><td colspan="2">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- PACKAGES -->
+    <section id="packagesSection" class="content-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Package Analysis</h2>
+            <p>Compare placement packages by role or department.</p>
+        </div>
+    </div>
+
+    <div class="package-summary">
+        <article class="mini-card">
+            <span>Mean Package</span>
+            <strong id="packageMean">--</strong>
+        </article>
+
+        <article class="mini-card">
+            <span>Median Package</span>
+            <strong id="packageMedian">--</strong>
+        </article>
+
+        <article class="mini-card">
+            <span>Package Records</span>
+            <strong id="packageRecords">--</strong>
+        </article>
+    </div>
+
+    <div class="package-view-options">
+        <button
+            type="button"
+            class="btn btn-yellow"
+            onclick="showPackageView('overall')">
+            Overall
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-yellow"
+            onclick="showPackageView('role')">
+            Role-wise
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-yellow"
+            onclick="showPackageView('department')">
+            Department-wise
+        </button>
+    </div>
+
+    <div id="packageViewTitle">
+        <h3>Overall Package Distribution</h3>
+    </div>
+
+    <div class="chart-container" id="packageChartContainer" hidden>
+        <canvas id="packageChart"></canvas>
+    </div>
+
+    <div id="rolePackageContainer" hidden>
+        <div class="chart-container">
+            <canvas id="rolePackageChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Role</th>
+                        <th>Students Placed</th>
+                        <th>Average Package (LPA)</th>
+                    </tr>
+                </thead>
+                <tbody id="rolePackageTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="departmentPackageContainer" hidden>
+        <div class="chart-container">
+            <canvas id="departmentPackageChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Average Package (LPA)</th>
+                    </tr>
+                </thead>
+                <tbody id="departmentPackageTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+    <!-- REPORTS -->
+    <section id="reportsSection" class="content-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Placement Reports</h2>
+                <p>Summary of the current placement data.</p>
+            </div>
+            <button class="btn btn-light" onclick="loadDashboard()">
+                Refresh Report
+            </button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Eligible Students</td><td id="reportEligible">--</td></tr>
+                    <tr><td>Students Placed</td><td id="reportPlaced">--</td></tr>
+                    <tr><td>Placement Rate</td><td id="reportRate">--</td></tr>
+                    <tr><td>Mean Package</td><td id="reportMean">--</td></tr>
+                    <tr><td>Median Package</td><td id="reportMedian">--</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="dashboard-footer">
+        Student Placement Data Analysis System
+    </footer>
+
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

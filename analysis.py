@@ -131,6 +131,58 @@ def get_skill_demand():
     finally:
         conn.close()
 
+def get_role_analysis():
+    """Analyze placement count and average package by job role."""
+    conn = get_connection()
+
+    query = """
+        SELECT
+            role,
+            COUNT(*) AS placement_count,
+            ROUND(AVG(package_lpa), 2) AS average_package_lpa
+        FROM placements
+        WHERE status = 'PLACED'
+          AND role IS NOT NULL
+          AND TRIM(role) != ''
+        GROUP BY role
+        ORDER BY placement_count DESC, role
+    """
+
+    try:
+        df = pd.read_sql(query, conn)
+
+        if not df.empty:
+            df["placement_count"] = (
+                df["placement_count"].fillna(0).astype(int)
+            )
+
+        return df
+
+    finally:
+        conn.close()
+
+def get_department_package_analysis():
+    conn = get_connection()
+
+    query = """
+        SELECT
+            s.department AS department,
+            ROUND(AVG(p.package_lpa), 2) AS average_package_lpa,
+            COUNT(p.placement_id) AS placement_count
+        FROM students s
+        JOIN placements p
+            ON s.student_id = p.student_id
+        WHERE p.status = 'PLACED'
+          AND p.package_lpa IS NOT NULL
+        GROUP BY s.department
+        ORDER BY average_package_lpa DESC
+    """
+
+    try:
+        df = pd.read_sql(query, conn)
+        return df
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     print("\n--- Placement Rate ---")
@@ -144,3 +196,10 @@ if __name__ == "__main__":
 
     print("\n--- Skill Demand Report ---")
     print(get_skill_demand().to_string(index=False))
+
+
+    print("\n--- Career Role Analysis ---")
+    print(get_role_analysis().to_string(index=False))
+
+    print("\n--- Department-wise Average Package Analysis ---")
+    print(get_department_package_analysis().to_string(index=False))
