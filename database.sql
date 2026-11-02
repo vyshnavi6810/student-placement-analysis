@@ -1,6 +1,7 @@
 -- Database creation---
 CREATE DATABASE student_placement_analysis;
-USE student_placement_analysis;
+
+USE student_pacement_analysis;
 
 -- 1. Student details and placement eligibility
 CREATE TABLE students (
