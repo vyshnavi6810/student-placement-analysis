@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Student Details</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body class="feature-page">
+<main class="feature-shell">
+<header class="feature-header">
+  <div><span class="eyebrow">STUDENT PORTAL</span><h1>Submit Your Details</h1>
+  <p>Enter your academic profile and placement information for college verification.</p></div>
+  <a class="btn btn-light" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</header>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+  {% for category, message in messages %}<div class="feature-alert {{ category }}">{{ message }}</div>{% endfor %}
+{% endif %}{% endwith %}
+<section class="feature-card-panel">
+<form method="POST" class="feature-form">
+<div class="form-grid">
+  <label>Roll Number<input name="roll_no" required maxlength="30" placeholder="e.g. 25102A040011"></label>
+  <label>Department
+    <select name="department" required>
+      <option value="">Select department</option><option>CSE</option><option>AI&ML</option><option>AI&DS</option><option>ECE</option><option>EEE</option><option>IT</option><option>MECH</option><option>CIVIL</option>
+    </select>
+  </label>
+  <label>Graduation Year<input name="graduation_year" type="number" min="2024" max="2100" required placeholder="2029"></label>
+  <label>Placement Eligibility<select name="is_eligible"><option value="yes">Eligible</option><option value="no">Not Eligible</option></select></label>
+  <label class="full-width">Skills <small>Enter comma-separated skills</small><input name="skills" placeholder="Python, Java, SQL, Communication"></label>
+  <label>Placement Status<select name="placement_status" id="placementStatus">
+    <option value="NOT_PLACED">Not Placed</option><option value="APPLIED">Applied</option><option value="SELECTED">Selected</option><option value="PLACED">Placed</option>
+  </select></label>
+  <label>Company<input name="company" placeholder="Company name (if applicable)"></label>
+  <label>Job Role<input name="job_role" placeholder="Job role (if applicable)"></label>
+  <label>Package (LPA)<input name="package_lpa" type="number" min="0" step="0.01" placeholder="e.g. 6.5"></label>
+</div>
+<p class="feature-hint">Your submission remains pending until the placement administrator verifies it.</p>
+<button class="btn btn-yellow" type="submit">Submit Details</button>
+</form>
+</section>
+<section class="feature-card-panel">
+<h2>My Submission History</h2>
+<div class="table-wrap"><table class="data-table">
+<thead><tr><th>Roll Number</th><th>Department</th><th>Graduation Year</th><th>Placement Status</th><th>Verification</th><th>Submitted</th></tr></thead>
+<tbody>{% for item in submissions %}<tr><td>{{ item.roll_no }}</td><td>{{ item.department }}</td><td>{{ item.graduation_year }}</td><td>{{ item.placement_status }}</td><td><span class="status-pill">{{ item.verification_status }}</span></td><td>{{ item.submitted_at }}</td></tr>
+{% else %}<tr><td colspan="6">No submissions yet.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+</main>
+</body></html>

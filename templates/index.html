@@ -25,11 +25,13 @@
         </div>
 
         <div class="top-actions">
-            <button class="btn btn-light" onclick="loadDashboard()">
-                ↻ Refresh
-            </button>
-            <a class="btn btn-yellow"
-               href="{{ url_for('logout') }}">Logout</a>
+            {% if session.get('role') == 'student' %}
+            <a class="btn btn-yellow" href="{{ url_for('student_submit') }}">Submit My Details</a>
+            {% elif session.get('role') == 'admin' %}
+            <a class="btn btn-yellow" href="{{ url_for('admin_submissions') }}">Review Student Submissions</a>
+            {% endif %}
+            <button class="btn btn-light" onclick="loadDashboard()">↻ Refresh</button>
+            <a class="btn btn-yellow" href="{{ url_for('logout') }}">Logout</a>
         </div>
     </header>
 
