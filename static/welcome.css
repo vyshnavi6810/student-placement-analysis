@@ -1,0 +1,143 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.welcome-page {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    background-image:
+        linear-gradient(
+            rgba(3, 15, 35, 0.35),
+            rgba(2, 12, 30, 0.55),
+            rgba(0, 8, 22, 0.85)
+        ),
+        url("/static/images/blue-forest.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.background-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(20, 95, 160, 0.12),
+        rgba(0, 15, 40, 0.35)
+    );
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 850px;
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+}
+
+.welcome-tag {
+    font-size: 13px;
+    letter-spacing: 4px;
+    font-weight: 600;
+    color: #d4eaff;
+    margin-bottom: 22px;
+}
+
+.welcome-content h1 {
+    font-size: clamp(55px, 9vw, 100px);
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: #ffffff;
+    text-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+}
+
+.heading-line {
+    width: 90px;
+    height: 4px;
+    background: #56b8ff;
+    margin: 18px auto 25px;
+    border-radius: 5px;
+}
+
+.welcome-description {
+    max-width: 650px;
+    margin: 0 auto 35px;
+    font-size: 17px;
+    line-height: 1.8;
+    color: #e3efff;
+    font-weight: 400;
+}
+
+.get-started {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 32px;
+    background: #ffffff;
+    color: #09264a;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 35px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.get-started span {
+    font-size: 20px;
+}
+
+.get-started:hover {
+    background: #168bd5;
+    color: white;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 120, 220, 0.4);
+}
+
+.bottom-text {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 11px;
+    letter-spacing: 2px;
+    z-index: 2;
+}
+
+@media (max-width: 600px) {
+    .welcome-tag {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+
+    .welcome-content h1 {
+        letter-spacing: 4px;
+    }
+
+    .welcome-description {
+        font-size: 14px;
+    }
+
+    .get-started {
+        padding: 13px 25px;
+    }
+}

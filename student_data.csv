@@ -1,0 +1,3 @@
+roll_no,department,graduation_year,is_eligible,skills,company,job_role,package_lpa,placement_status
+TEST001,CSE,2029,TRUE,"Java,Python,SQL",TCS,Developer,6.5,PLACED
+TEST002,AI&ML,2029,TRUE,"Python,Machine Learning",,,,

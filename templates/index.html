@@ -29,6 +29,10 @@
             <a class="btn btn-yellow" href="{{ url_for('student_submit') }}">Submit My Details</a>
             {% elif session.get('role') == 'admin' %}
             <a class="btn btn-yellow" href="{{ url_for('admin_submissions') }}">Review Student Submissions</a>
+
+            <a class="btn btn-yellow" href="{{ url_for('admin_bulk_upload') }}">
+    Bulk Upload Students
+</a>
             {% endif %}
             <button class="btn btn-light" onclick="loadDashboard()">↻ Refresh</button>
             <a class="btn btn-yellow" href="{{ url_for('logout') }}">Logout</a>

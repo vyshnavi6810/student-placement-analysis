@@ -69,14 +69,32 @@ function commonOptions() {
         plugins: {
             legend: {
                 labels: {
+                    color: "#244B70",
                     usePointStyle: true,
                     boxWidth: 8
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: "#44566B"
+                },
+                grid: {
+                    color: "#E5EDF5"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#44566B"
+                },
+                grid: {
+                    color: "#E5EDF5"
                 }
             }
         }
     };
 }
-
 // Create or update a chart
 function drawChart(id, config) {
     const canvas = document.getElementById(id);
@@ -122,8 +140,8 @@ function renderDepartmentChart() {
                 data: departmentData.map(item =>
                     Number(item.placement_rate_percent ?? 0)
                 ),
-                backgroundColor: "#f0cc37",
-                borderColor: "#d9b52a",
+                backgroundColor: "#397FB5",
+                borderColor: "#244B70",
                 borderWidth: 1,
                 borderRadius: 5,
                 maxBarThickness: 45
@@ -201,7 +219,8 @@ function renderPackageChart() {
                     mean == null ? null : Number(mean),
                     median == null ? null : Number(median)
                 ],
-                backgroundColor: ["#f0cc37", "#e5b72e"],
+                backgroundColor: ["#397FB5", "#244B70"],
+                borderColor: ["#244B70", "#10243B"],
                 borderRadius: 5
             }]
         },
@@ -240,8 +259,8 @@ function renderRolePackageChart() {
                         ? null
                         : Number(item.average_package_lpa)
                 ),
-                backgroundColor: "#f0cc37",
-                borderColor: "#d9b52a",
+                backgroundColor: "#397FB5",
+                borderColor: "#244B70",
                 borderWidth: 1,
                 borderRadius: 5
             }]
@@ -305,7 +324,8 @@ function renderDepartmentPackageChart() {
                         ? null
                         : Number(item.average_package_lpa)
                 ),
-                backgroundColor: "#e5b72e",
+                backgroundColor: "#244B70",
+                borderColor: "#10243B",
                 borderRadius: 5
             }]
         },
@@ -365,8 +385,9 @@ function renderSkillChart() {
                 data: skillData.map(item =>
                     Number(item.student_count ?? 0)
                 ),
-                backgroundColor: "#f0cc37",
-                borderRadius: 5
+                backgroundColor: "#397FB5",
+                borderColor: "#244B70",
+                borderWidth: 1,
             }]
         },
         options: {

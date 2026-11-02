@@ -1,4 +1,6 @@
 import os
+import csv
+import io
 import pandas as pd
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -112,7 +114,7 @@ def register():
 
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    return render_template("welcome.html")
 
 @app.route("/dashboard")
 @login_required
@@ -214,6 +216,186 @@ def admin_submissions():
         if cursor: cursor.close()
         if conn and conn.is_connected(): conn.close()
     return render_template("admin_submissions.html", submissions=rows)
+
+
+
+@app.route("/admin/bulk-upload", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def admin_bulk_upload():
+    if request.method == "GET":
+        return render_template("bulk_upload.html")
+
+    file = request.files.get("file")
+
+    if not file or not file.filename:
+        flash("Please select a CSV file.", "error")
+        return redirect(url_for("admin_bulk_upload"))
+
+    if not file.filename.lower().endswith(".csv"):
+        flash("Please upload a CSV file.", "error")
+        return redirect(url_for("admin_bulk_upload"))
+
+    conn = cursor = None
+    inserted = 0
+    duplicates = 0
+    errors = []
+
+    try:
+        df = pd.read_csv(file, dtype=str, encoding="utf-8-sig")
+        df.columns = df.columns.str.strip().str.lower()
+
+        required = {
+            "roll_no", "department",
+            "graduation_year", "is_eligible"
+        }
+
+        if not required.issubset(df.columns):
+            missing = required - set(df.columns)
+            raise ValueError(
+                "Missing columns: " + ", ".join(sorted(missing))
+            )
+
+        if len(df) > 5000:
+            raise ValueError("Maximum 5000 rows per upload.")
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        conn.start_transaction()
+
+        seen_rolls = set()
+
+        for index, row in df.iterrows():
+            row_number = index + 2
+
+            def value(column):
+                if column not in df.columns or pd.isna(row[column]):
+                    return ""
+                return str(row[column]).strip()
+
+            try:
+                roll_no = value("roll_no")
+                department = value("department")
+                year_text = value("graduation_year")
+                eligible_text = value("is_eligible").lower()
+
+                if not roll_no or not department or not year_text:
+                    raise ValueError("Missing required student details.")
+
+                if roll_no in seen_rolls:
+                    duplicates += 1
+                    continue
+
+                seen_rolls.add(roll_no)
+
+                year = int(year_text)
+                if year < 1901 or year > 2155:
+                    raise ValueError("Invalid graduation year.")
+
+                if eligible_text in {"true", "1", "yes"}:
+                    eligible = 1
+                elif eligible_text in {"false", "0", "no"}:
+                    eligible = 0
+                else:
+                    raise ValueError("is_eligible must be TRUE or FALSE.")
+
+                skills = [
+                    s.strip()
+                    for s in value("skills").split(",")
+                    if s.strip()
+                ]
+
+                company = value("company")
+                job_role = value("job_role")
+                status = value("placement_status").upper()
+                package_text = value("package_lpa")
+
+                if status and status not in {
+                    "APPLIED", "SELECTED", "PLACED",
+                    "REJECTED", "WITHDRAWN"
+                }:
+                    raise ValueError("Invalid placement status.")
+
+                package = None
+                if package_text:
+                    package = float(package_text)
+                    if package < 0:
+                        raise ValueError("Package cannot be negative.")
+
+                if status and (not company or not job_role):
+                    raise ValueError("Company and job role are required.")
+
+                if package is not None and not status:
+                    raise ValueError("Placement status is required for a package.")
+
+                cursor.execute("""
+                    INSERT IGNORE INTO students
+                    (roll_no, department, graduation_year, is_eligible)
+                    VALUES (%s, %s, %s, %s)
+                """, (roll_no, department, year, eligible))
+
+                if cursor.rowcount == 0:
+                    duplicates += 1
+                    continue
+
+                student_id = cursor.lastrowid
+
+                for skill in skills:
+                    cursor.execute(
+                        "INSERT IGNORE INTO skills(skill_name) VALUES(%s)",
+                        (skill,)
+                    )
+                    cursor.execute(
+                        "SELECT skill_id FROM skills WHERE skill_name=%s",
+                        (skill,)
+                    )
+                    skill_id = cursor.fetchone()["skill_id"]
+
+                    cursor.execute("""
+                        INSERT IGNORE INTO student_skills
+                        (student_id, skill_id)
+                        VALUES (%s, %s)
+                    """, (student_id, skill_id))
+
+                if status:
+                    cursor.execute("""
+                        INSERT INTO placements
+                        (student_id, company, role, package_lpa,
+                         placement_date, status)
+                        VALUES (%s, %s, %s, %s,
+                                CASE WHEN %s='PLACED'
+                                     THEN CURDATE() ELSE NULL END,
+                                %s)
+                    """, (
+                        student_id, company, job_role,
+                        package, status, status
+                    ))
+
+                inserted += 1
+
+            except (ValueError, TypeError, OverflowError) as error:
+                errors.append(f"Row {row_number}: {error}")
+
+        conn.commit()
+
+    except Exception as error:
+        if conn:
+            conn.rollback()
+        app.logger.exception("Bulk student upload failed")
+        flash(f"Upload failed: {error}", "error")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+    return render_template(
+        "bulk_upload.html",
+        inserted=inserted,
+        duplicates=duplicates,
+        errors=errors
+    )
 
 @app.route("/admin/submissions/<int:submission_id>/verify", methods=["POST"])
 @login_required

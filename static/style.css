@@ -1088,3 +1088,288 @@ body:not(.login-page) {
 }
 
 
+
+/* ===== BLUE FOREST THEME ===== */
+
+:root {
+    --navy: #10243B;
+    --text: #172B40;
+    --muted: #718399;
+    --border: #DCE7F1;
+    --background: #F4F8FC;
+    --coral: #397FB5;
+    --teal: #5A9BCB;
+}
+
+html {
+    background: #F4F8FC;
+}
+
+body:not(.login-page) {
+    background: linear-gradient(135deg, #DCEBFA, #F4F8FC 55%, #E5EFF8);
+    color: var(--text);
+}
+
+.sidebar {
+    background: #10243B;
+    border-right-color: #263F59;
+    color: white;
+}
+
+.brand,
+.sidebar-footer {
+    color: #EAF3FC;
+}
+
+.brand-icon {
+    background: linear-gradient(135deg, #78A9D1, #397FB5);
+    color: white;
+}
+
+.nav-label {
+    color: #9DB5CD;
+}
+
+.nav-item {
+    color: #D5E4F2;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #244B70;
+    color: white;
+}
+
+.sidebar-footer {
+    border-top-color: #34506C;
+}
+
+.topbar {
+    border-bottom-color: var(--border);
+}
+
+.breadcrumb,
+.status {
+    color: #718399;
+}
+
+.eyebrow {
+    color: #397FB5;
+}
+
+.panel,
+.stat-card,
+.quick-nav-item,
+.dropdown-menu,
+.menu-button,
+.page-card,
+.content-card,
+.settings-card,
+.table-card {
+    background: #FFFFFF;
+    border-color: var(--border);
+}
+
+.panel,
+.stat-card {
+    box-shadow: 0 5px 20px rgba(16, 36, 59, 0.06);
+}
+
+.stat-card:nth-child(1),
+.stat-card:nth-child(2),
+.stat-card:nth-child(3),
+.stat-card:nth-child(4) {
+    border-top: 3px solid #5A9BCB;
+}
+
+.stat-icon,
+.blue {
+    background: #E4F0FA;
+    color: #28699E;
+}
+
+.teal {
+    background: #E2F3F2;
+    color: #287F82;
+}
+
+.purple {
+    background: #EEEAFB;
+    color: #7462B2;
+}
+
+.orange {
+    background: #FCEDE4;
+    color: #B66B43;
+}
+
+.quick-nav-item:hover,
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+    background: #EAF3FB;
+    border-color: #B7D1E8;
+    color: #244B70;
+}
+
+.refresh-btn:hover,
+.download-btn:hover {
+    border-color: #397FB5;
+    color: #28699E;
+}
+
+table th {
+    background: #EAF2F9;
+    color: #244B70;
+}
+
+table tbody tr:hover {
+    background: #F1F7FC;
+}
+
+.page-footer {
+    color: #718399;
+}
+
+.primary-button,
+button[type="submit"] {
+    background: linear-gradient(100deg, #397FB5, #244B70);
+    color: white;
+}
+
+.primary-button:hover,
+button[type="submit"]:hover {
+    box-shadow: 0 6px 18px rgba(36, 75, 112, 0.2);
+}
+
+input,
+select,
+textarea {
+    border-color: #C9D8E7;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #397FB5;
+    box-shadow: 0 0 0 3px rgba(57, 127, 181, 0.14);
+    outline: none;
+}
+
+.menu-button:focus-visible,
+.quick-nav-item:focus-visible,
+.refresh-btn:focus-visible,
+.download-btn:focus-visible,
+input:focus-visible,
+button:focus-visible {
+    outline: 3px solid rgba(57, 127, 181, 0.35);
+    outline-offset: 2px;
+}
+
+/* Login page */
+
+.login-page {
+    background: linear-gradient(135deg, #10243B, #244B70, #78A9D1);
+}
+
+.login-card {
+    box-shadow: 0 25px 60px rgba(5, 20, 38, 0.28);
+}
+
+.login-illustration {
+    background: linear-gradient(145deg, #EAF3FB, #D5E7F6);
+}
+
+.illustration-circle {
+    background: #BDD8EF;
+}
+
+.login-illustration h2,
+.login-form-section h1 {
+    color: #10243B;
+}
+
+.chart-decoration {
+    box-shadow: 0 5px 20px rgba(16, 36, 59, 0.10);
+}
+
+.chart-decoration span {
+    background: #397FB5;
+}
+
+.login-stats span {
+    border-color: #C9DCEB;
+    color: #244B70;
+}
+
+.login-logo {
+    background: linear-gradient(135deg, #78A9D1, #397FB5);
+    color: white;
+}
+
+.login-form-section .eyebrow {
+    color: #397FB5;
+}
+
+.input-wrapper:focus-within {
+    border-color: #397FB5;
+    box-shadow: 0 0 0 3px rgba(57, 127, 181, 0.14);
+}
+
+.login-button {
+    background: linear-gradient(100deg, #397FB5, #244B70);
+    color: white;
+}
+
+.login-button:hover {
+    box-shadow: 0 8px 18px rgba(36, 75, 112, 0.25);
+}
+
+/* Welcome and feature pages */
+
+.dashboard-page {
+    background: #F4F8FC;
+    color: #172B40;
+}
+
+.dashboard-page .eyebrow {
+    color: #397FB5;
+}
+
+.dashboard-page .btn {
+    border-color: #C9D8E7;
+    color: #244B70;
+}
+
+.dashboard-page .btn-yellow {
+    background: linear-gradient(100deg, #397FB5, #244B70);
+    border-color: #397FB5;
+    color: white;
+}
+
+.dashboard-page .btn-yellow:hover {
+    background: #10243B;
+}
+
+.feature-page {
+    background: linear-gradient(135deg, #10243B, #244B70, #78A9D1);
+}
+
+.feature-card-panel {
+    border-color: #DCE7F1;
+}
+
+.feature-form input:focus,
+.feature-form select:focus {
+    border-color: #397FB5;
+    box-shadow: 0 0 0 3px rgba(57, 127, 181, 0.14);
+}
+
+.login-page .input-wrapper:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(57, 127, 181, 0.18);
+}
+
+.login-page .input-wrapper input:focus {
+    outline: none;
+    box-shadow: none;
+}
