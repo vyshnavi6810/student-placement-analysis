@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+
+    <h1>Student Placement Analysis</h1>
+    <p>Choose your institution to access its placement portal.</p>
+</section>
+
+<div class="uni-select-container">
+    <form class="uni-select-form" id="universityForm">
+
+    <h2>Select Your Institution</h2>
+
+    <label for="university">University</label>
+
+    <select id="university" required>
+        <option value="" selected disabled>
+            Choose your university
+        </option>
+
+        {% for u in universities %}
+        <option value="{{ u.slug }}">{{ u.name }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn-primary">
+        Continue →
+    </button>
+
+</form>
+
+<script>
+document.getElementById("universityForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const slug = document.getElementById("university").value;
+
+    if (slug) {
+        window.location.href = "/select-university/" + encodeURIComponent(slug);
+    }
+});
+</script>
+</div>
+
+{% endblock %}

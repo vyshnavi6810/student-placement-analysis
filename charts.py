@@ -8,10 +8,8 @@ from analysis import (
     get_skill_demand
 )
 
-
 def create_reports_folder():
-    os.makedirs("reports", exist_ok=True)
-
+    os.makedirs("static/reports", exist_ok=True)
 
 def plot_department_placement():
     df = get_department_report()
@@ -23,10 +21,7 @@ def plot_department_placement():
     create_reports_folder()
 
     plt.figure(figsize=(9, 5))
-    plt.bar(
-        df["department"],
-        df["placement_rate_percent"]
-    )
+    plt.bar(df["department"], df["placement_rate_percent"])
 
     plt.title("Department-wise Placement Rate")
     plt.xlabel("Department")
@@ -34,10 +29,8 @@ def plot_department_placement():
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout()
 
-    plt.savefig("reports/department_placement.png")
-    plt.show()
+    plt.savefig("static/reports/department_placement.png")
     plt.close()
-
 
 def plot_package_summary():
     summary = get_package_summary()
@@ -58,10 +51,8 @@ def plot_package_summary():
     plt.ylabel("Package (LPA)")
     plt.tight_layout()
 
-    plt.savefig("reports/package_summary.png")
-    plt.show()
+    plt.savefig("static/reports/package_summary.png")
     plt.close()
-
 
 def plot_skill_demand():
     df = get_skill_demand()
@@ -81,14 +72,11 @@ def plot_skill_demand():
     plt.gca().invert_yaxis()
     plt.tight_layout()
 
-    plt.savefig("reports/skill_demand.png")
-    plt.show()
+    plt.savefig("static/reports/skill_demand.png")
     plt.close()
-
-
 
 if __name__ == "__main__":
     plot_department_placement()
     plot_package_summary()
     plot_skill_demand()
-
+    print("Charts generated successfully!")

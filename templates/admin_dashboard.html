@@ -1,0 +1,67 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Admin dashboard</h1>
+
+<p class="muted">
+    {{ university.name }} · Official analytics include verified student records only.
+</p>
+
+<!-- KPI Cards -->
+<div class="kpis">
+    <div>
+        <span>Total students</span>
+        <strong>{{ data.summary.total_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placed students</span>
+        <strong>{{ data.summary.placed_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Average package</span>
+        <strong>{{ data.summary.avg_package or '—' }} LPA</strong>
+    </div>
+
+    <div>
+        <span>Placement rate</span>
+        <strong>{{ data.summary.placement_rate }}%</strong>
+    </div>
+</div>
+
+<!-- Interactive Placement Charts -->
+<div class="grid2">
+
+    <section class="panel">
+        <h2>Department-wise Placement</h2>
+        <canvas id="departmentChart"></canvas>
+    </section>
+
+    <section class="panel">
+        <h2>Package Summary</h2>
+        <canvas id="packageChart"></canvas>
+    </section>
+
+    <section class="panel">
+        <h2>Skill Demand</h2>
+        <canvas id="skillChart"></canvas>
+    </section>
+
+    <section class="panel">
+        <h2>Year-wise Placement Trend</h2>
+        <canvas id="yearChart"></canvas>
+    </section>
+
+</div>
+
+<!-- Bulk Upload -->
+<a class="button" href="{{ url_for('admin_bulk_upload') }}">
+    Bulk upload students
+</a>
+
+
+
+{% endblock %}

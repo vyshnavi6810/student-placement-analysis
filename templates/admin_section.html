@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ section }}</h1>
+
+<!-- Filters -->
+<form class="filters" method="get">
+
+    {% if section|lower in ['students', 'departments', 'skills', 'packages', 'placements'] %}
+
+    <label>
+        Department
+        <input name="department"
+               value="{{ filters.department or '' }}"
+               placeholder="e.g. CSE">
+    </label>
+
+    <label>
+        Graduation year
+        <input name="graduation_year"
+               value="{{ filters.graduation_year or '' }}"
+               placeholder="e.g. 2027">
+    </label>
+
+    {% endif %}
+
+    {% if section|lower in ['skills', 'packages', 'placements'] %}
+
+    <label>
+        Skill
+        <input name="skill"
+               value="{{ filters.skill or '' }}"
+               placeholder="e.g. Python">
+    </label>
+
+    {% endif %}
+
+    {% if section|lower in ['packages', 'placements'] %}
+
+    <label>
+        Placement year
+        <input name="placement_year"
+               value="{{ filters.placement_year or '' }}"
+               placeholder="e.g. 2026">
+    </label>
+
+    <label>
+        Role
+        <input name="role"
+               value="{{ filters.role or '' }}"
+               placeholder="e.g. Software Engineer">
+    </label>
+
+    <label>
+        Company
+        <input name="company"
+               value="{{ filters.company or '' }}"
+               placeholder="Company name">
+    </label>
+
+    {% endif %}
+
+    <button type="submit">Apply Filters</button>
+
+    <a class="button secondary" href="{{ request.path }}">
+        Clear
+    </a>
+
+</form>
+
+<!-- Interactive Chart -->
+<div class="panel">
+    <h2>{{ section }} Analytics</h2>
+
+    <div style="position:relative; width:100%; min-height:300px;">
+        <canvas id="sectionChart"
+                data-section="{{ section|lower }}">
+        </canvas>
+    </div>
+</div>
+
+<!-- CSV Download -->
+<button
+    type="button"
+    onclick="downloadSectionCSV('{{ section|lower }}')">
+    Download CSV
+</button>
+<!-- Records Table -->
+<div class="panel">
+
+    <h2>{{ section }} Records</h2>
+
+    <table>
+
+        {% if rows %}
+
+        <thead>
+            <tr>
+                {% for key in rows[0].keys() %}
+                <th>{{ key.replace('_',' ').title() }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for value in row.values() %}
+                <td>{{ value if value is not none else '—' }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        {% else %}
+
+        <tr>
+            <td>No records for the selected filters.</td>
+        </tr>
+
+        {% endif %}
+
+    </table>
+
+</div>
+
+{% endblock %}

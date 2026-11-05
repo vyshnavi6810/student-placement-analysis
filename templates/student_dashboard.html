@@ -1,0 +1,100 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Student Dashboard</h1>
+
+<p class="muted">
+    {{ university.name }} · Your personal progress and university-level recorded insights.
+</p>
+
+<!-- Personal KPI Cards -->
+<div class="kpis">
+
+    <div>
+        <span>Submissions</span>
+        <strong>{{ sub.total or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Verified</span>
+        <strong>{{ sub.verified or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placement Records</span>
+        <strong>{{ placements|length }}</strong>
+    </div>
+
+    <div>
+        <span>My Skills</span>
+        <strong>{{ skills|length }}</strong>
+    </div>
+
+</div>
+
+<!-- University Overview -->
+<h2>University Placement Overview</h2>
+
+<div class="kpis">
+
+    <div>
+        <span>Total Students</span>
+        <strong>{{ data.summary.total_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placed Students</span>
+        <strong>{{ data.summary.placed_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placement Rate</span>
+        <strong>{{ data.summary.placement_rate }}%</strong>
+    </div>
+
+    <div>
+        <span>Average Package</span>
+        <strong>{{ data.summary.avg_package or '—' }} LPA</strong>
+    </div>
+
+</div>
+
+<!-- Graphical Analytics -->
+<h2>Placement Analytics</h2>
+
+<div class="grid2">
+
+    <section class="panel">
+        <h3>Department Placement</h3>
+        <canvas id="studentDepartmentChart"></canvas>
+        <small>Verified placements among eligible students.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Most-Recorded Skills</h3>
+        <canvas id="studentSkillChart"></canvas>
+        <small>Most commonly recorded student skills.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Year-wise Placement Records</h3>
+        <canvas id="studentYearChart"></canvas>
+        <small>Verified placement records by year.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Common Placed Job Roles</h3>
+        <canvas id="studentRoleChart"></canvas>
+        <small>Most frequently recorded placement roles.</small>
+    </section>
+
+</div>
+
+      <script id="student-analytics" type="application/json">
+    {{ data | tojson }}
+   </script>
+
+
+{% endblock %}

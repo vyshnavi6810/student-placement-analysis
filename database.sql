@@ -1,39 +1,101 @@
--- Database creation---
-CREATE DATABASE student_placement_analysis;
+USE defaultdb;
 
-USE student_pacement_analysis;
+-- FRESH MULTI-UNIVERSITY DATABASE SETUP
+-- WARNING: This permanently deletes the existing project tables and records.
 
--- 1. Student details and placement eligibility
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS placement_submissions;
+DROP TABLE IF EXISTS student_skills;
+DROP TABLE IF EXISTS placements;
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS student_accounts;
+DROP TABLE IF EXISTS universities;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 1. Universities
+CREATE TABLE universities (
+    university_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(160) NOT NULL,
+    slug VARCHAR(80) NOT NULL UNIQUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO universities (name, slug) VALUES
+('Mohan Babu University', 'mbu'),
+('ABC University', 'abc-university'),
+('XYZ College', 'xyz-college');
+
+-- 2. Student accounts
+CREATE TABLE student_accounts (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_student_email_university (university_id, email),
+    UNIQUE KEY uq_student_username_university (university_id, username),
+    UNIQUE KEY uq_account_university_user (university_id, user_id),
+    CONSTRAINT fk_account_university
+        FOREIGN KEY (university_id)
+        REFERENCES universities (university_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. Students
 CREATE TABLE students (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
-    roll_no VARCHAR(30) NOT NULL UNIQUE,
+    university_id INT NOT NULL,
+    user_id INT NULL,
+    roll_no VARCHAR(30) NOT NULL,
     department VARCHAR(100) NOT NULL,
     graduation_year YEAR NOT NULL,
-    is_eligible BOOLEAN NOT NULL DEFAULT TRUE
-);
+    is_eligible BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE KEY uq_roll_university (university_id, roll_no),
+    UNIQUE KEY uq_student_user_university (university_id, user_id),
+    UNIQUE KEY uq_student_university_id (university_id, student_id),
+    CONSTRAINT fk_student_university
+        FOREIGN KEY (university_id)
+        REFERENCES universities (university_id),
+    CONSTRAINT fk_student_account
+        FOREIGN KEY (user_id)
+        REFERENCES student_accounts (user_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 2. List of technical  skills and other skills
+-- 4. Skills
 CREATE TABLE skills (
     skill_id INT AUTO_INCREMENT PRIMARY KEY,
-    skill_name VARCHAR(100) NOT NULL UNIQUE
-);
+    university_id INT NOT NULL,
+    skill_name VARCHAR(100) NOT NULL,
+    UNIQUE KEY uq_skill_university (university_id, skill_name),
+    UNIQUE KEY uq_skill_university_id (university_id, skill_id),
+    CONSTRAINT fk_skill_university
+        FOREIGN KEY (university_id)
+        REFERENCES universities (university_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. relationship between students and skills
+-- 5. Student skills
 CREATE TABLE student_skills (
+    university_id INT NOT NULL,
     student_id INT NOT NULL,
     skill_id INT NOT NULL,
-    PRIMARY KEY (student_id, skill_id),
-    FOREIGN KEY (student_id)
-        REFERENCES students(student_id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (skill_id)
-        REFERENCES skills(skill_id)
-        ON DELETE CASCADE
-);
+    PRIMARY KEY (university_id, student_id, skill_id),
+    CONSTRAINT fk_ss_student_tenant
+        FOREIGN KEY (university_id, student_id)
+        REFERENCES students (university_id, student_id) ON DELETE CASCADE,
+    CONSTRAINT fk_ss_skill_tenant
+        FOREIGN KEY (university_id, skill_id)
+        REFERENCES skills (university_id, skill_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Company applications and placement status
+-- 6. Placements
 CREATE TABLE placements (
     placement_id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT NOT NULL,
     student_id INT NOT NULL,
     company VARCHAR(150) NOT NULL,
     role VARCHAR(150) NOT NULL,
@@ -46,138 +108,99 @@ CREATE TABLE placements (
         'REJECTED',
         'WITHDRAWN'
     ) NOT NULL DEFAULT 'APPLIED',
-    FOREIGN KEY (student_id)
-        REFERENCES students(student_id),
-    CHECK (package_lpa IS NULL OR package_lpa >= 0),
-    INDEX idx_placement_status (status),
-    INDEX idx_placement_company (company)
-);
+    CONSTRAINT fk_placement_student_tenant
+        FOREIGN KEY (university_id, student_id)
+        REFERENCES students (university_id, student_id),
+    INDEX idx_placement_tenant_status (university_id, status),
+    INDEX idx_placement_company (university_id, company)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
-
-
-
-CREATE TABLE IF NOT EXISTS student_accounts (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS placement_submissions (
+-- 7. Placement submissions
+CREATE TABLE placement_submissions (
     submission_id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT NOT NULL,
     user_id INT NOT NULL,
+    roll_no VARCHAR(30) NOT NULL,
     department VARCHAR(100) NOT NULL,
+    graduation_year YEAR NOT NULL,
+    is_eligible BOOLEAN NOT NULL DEFAULT TRUE,
     skills TEXT,
-    placement_status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+    placement_status VARCHAR(30) NOT NULL DEFAULT 'NOT_PLACED',
     company VARCHAR(150),
     job_role VARCHAR(150),
     package_lpa DECIMAL(8,2),
-    verification_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+    verification_status ENUM(
+        'Pending',
+        'Verified',
+        'Rejected'
+    ) NOT NULL DEFAULT 'Pending',
+    admin_remarks TEXT,
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     verified_at TIMESTAMP NULL,
     verified_by VARCHAR(50),
-    FOREIGN KEY (user_id)
-        REFERENCES student_accounts(user_id)
-        ON DELETE CASCADE
-);
+    CONSTRAINT fk_submission_university
+        FOREIGN KEY (university_id)
+        REFERENCES universities (university_id),
+    CONSTRAINT fk_submission_account
+        FOREIGN KEY (user_id)
+        REFERENCES student_accounts (user_id) ON DELETE CASCADE,
+    INDEX idx_submission_tenant_status (university_id, verification_status),
+    INDEX idx_submission_user (university_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 8. ABC and XYZ demo students
+INSERT INTO students
+(university_id, roll_no, department, graduation_year, is_eligible)
+SELECT university_id, 'ABC2029CSE001', 'CSE', 2029, 1
+FROM universities WHERE slug = 'abc-university';
 
-SHOW TABLES;
+INSERT INTO students
+(university_id, roll_no, department, graduation_year, is_eligible)
+SELECT university_id, 'ABC2029ECE001', 'ECE', 2029, 1
+FROM universities WHERE slug = 'abc-university';
 
+INSERT INTO students
+(university_id, roll_no, department, graduation_year, is_eligible)
+SELECT university_id, 'XYZ2029IT001', 'IT', 2029, 1
+FROM universities WHERE slug = 'xyz-college';
 
-INSERT IGNORE INTO students (roll_no, department, graduation_year, is_eligible) VALUES
--- CSE: 25102A04 series
-('25102A040011', 'CSE', 2029, TRUE),
-('25102A040012', 'CSE', 2029, TRUE),
-('25102A040013', 'CSE', 2029, FALSE),
-('25102A040014', 'CSE', 2029, TRUE),
-('25102A040015', 'CSE', 2029, FALSE),
-('25102A040016', 'CSE', 2029, TRUE),
-('25102A040017', 'CSE', 2029, TRUE),
-('25102A040018', 'CSE', 2029, FALSE),
-('25102A040019', 'CSE', 2029, TRUE),
-('25102A040020', 'CSE', 2029, TRUE),
--- AI&ML: 25102A01 series
-('25102A010011', 'AI&ML', 2029, TRUE),
-('25102A010012', 'AI&ML', 2029, FALSE),
-('25102A010013', 'AI&ML', 2029, TRUE),
-('25102A010014', 'AI&ML', 2029, TRUE),
-('25102A010015', 'AI&ML', 2029, FALSE),
-('25102A010016', 'AI&ML', 2029, TRUE),
-('25102A010017', 'AI&ML', 2029, TRUE),
-('25102A010018', 'AI&ML', 2029, FALSE),
-('25102A010019', 'AI&ML', 2029, TRUE),
-('25102A010020', 'AI&ML', 2029, TRUE),
--- AI&DS: 25102A02 series used here as sample data; verify official code with college
-('25102A020011', 'AI&DS', 2029, TRUE),
-('25102A020012', 'AI&DS', 2029, TRUE),
-('25102A020013', 'AI&DS', 2029, FALSE),
-('25102A020014', 'AI&DS', 2029, TRUE),
-('25102A020015', 'AI&DS', 2029, FALSE),
-('25102A020016', 'AI&DS', 2029, TRUE),
-('25102A020017', 'AI&DS', 2029, TRUE),
-('25102A020018', 'AI&DS', 2029, FALSE),
-('25102A020019', 'AI&DS', 2029, TRUE),
-('25102A020020', 'AI&DS', 2029, TRUE);
+INSERT INTO students
+(university_id, roll_no, department, graduation_year, is_eligible)
+SELECT university_id, 'XYZ2029CSE001', 'CSE', 2029, 1
+FROM universities WHERE slug = 'xyz-college';
 
--- 4. Skill catalogue
-INSERT IGNORE INTO skills (skill_name) VALUES
-('Python'), ('Java'), ('SQL'), ('Web Development'), ('Data Structures'),
-('Machine Learning'), ('Statistics'), ('Data Visualization'), ('Deep Learning'), ('Communication');
-
--- 5. Skill assignments use roll_no lookups, not assumed auto-increment IDs
-INSERT IGNORE INTO student_skills (student_id, skill_id)
-SELECT s.student_id, sk.skill_id
+-- 9. Demo placements
+INSERT INTO placements
+(university_id, student_id, company, role, package_lpa, placement_date, status)
+SELECT s.university_id, s.student_id,
+       'DemoTech', 'Software Engineer', 7.50, '2026-08-15', 'PLACED'
 FROM students s
-JOIN skills sk ON (
-    (s.roll_no IN ('25102A040011', '25102A010011', '25102A020011')
-        AND sk.skill_name IN ('Python', 'SQL'))
- OR (s.roll_no IN ('25102A040012', '25102A010013', '25102A020012')
-        AND sk.skill_name IN ('Java', 'Data Structures'))
- OR (s.roll_no IN ('25102A010014', '25102A020014')
-        AND sk.skill_name IN ('Machine Learning', 'Python', 'Statistics'))
- OR (s.roll_no IN ('25102A040016', '25102A010016', '25102A020016')
-        AND sk.skill_name IN ('SQL', 'Data Visualization'))
-);
+JOIN universities u ON u.university_id = s.university_id
+WHERE s.roll_no = 'ABC2029CSE001'
+AND u.slug = 'abc-university';
 
--- 6. Illustrative placement/application data
-INSERT INTO placements (student_id, company, role, package_lpa, placement_date, status) SELECT student_id, 'TCS', 'Data Analyst', 6.00, '2026-08-10', 'PLACED' FROM students WHERE roll_no = '25102A040011' AND is_eligible = TRUE;
-INSERT INTO placements (student_id, company, role, package_lpa, placement_date, status) SELECT student_id, 'Infosys', 'Software Engineer', 8.00, '2026-08-15', 'PLACED' FROM students WHERE roll_no = '25102A040012' AND is_eligible = TRUE;
-INSERT INTO placements (student_id, company, role, package_lpa, placement_date, status) SELECT student_id, 'Wipro', 'Software Engineer', 5.00, '2026-08-20', 'PLACED' FROM students WHERE roll_no = '25102A010011' AND is_eligible = TRUE;
-INSERT INTO placements (student_id, company, role, package_lpa, placement_date, status) SELECT student_id, 'Accenture', 'Associate Software Engineer', NULL, NULL, 'APPLIED' FROM students WHERE roll_no = '25102A020011';
+INSERT INTO placements
+(university_id, student_id, company, role, package_lpa, placement_date, status)
+SELECT s.university_id, s.student_id,
+       'Sample Systems', 'Data Analyst', 6.00, '2026-08-20', 'PLACED'
+FROM students s
+JOIN universities u ON u.university_id = s.university_id
+WHERE s.roll_no = 'XYZ2029IT001'
+AND u.slug = 'xyz-college';
 
--- 7. Analysis queries
-SELECT COUNT(*) AS total_students FROM students;
-SELECT department, COUNT(*) AS total_students, SUM(is_eligible=TRUE) AS eligible_students, SUM(is_eligible=FALSE) AS ineligible_students FROM students GROUP BY department ORDER BY department;
-SELECT roll_no, department, graduation_year, IF(is_eligible,'Eligible','Not Eligible') AS eligibility FROM students ORDER BY department, roll_no;
-SELECT s.roll_no, s.department, sk.skill_name FROM students s JOIN student_skills ss ON ss.student_id=s.student_id JOIN skills sk ON sk.skill_id=ss.skill_id ORDER BY s.roll_no, sk.skill_name;
-SELECT company, role, status, COUNT(*) AS student_count, ROUND(AVG(package_lpa),2) AS average_package_lpa FROM placements GROUP BY company, role, status ORDER BY company, role;
-SELECT s.department, COUNT(p.placement_id) AS placed_students, ROUND(AVG(CASE WHEN p.status='PLACED' THEN p.package_lpa END),2) AS avg_package_lpa FROM students s LEFT JOIN placements p ON p.student_id=s.student_id AND p.status='PLACED' GROUP BY s.department ORDER BY s.department;
-SELECT s.roll_no, s.department, p.company, p.role, p.package_lpa, p.status FROM students s JOIN placements p ON p.student_id=s.student_id ORDER BY p.status, s.roll_no;
--- End of project script.
+-- 10. Verify the setup
+SELECT university_id, name, slug
+FROM universities
+ORDER BY university_id;
 
+SELECT u.slug, COUNT(s.student_id) AS student_count
+FROM universities u
+LEFT JOIN students s ON s.university_id = u.university_id
+GROUP BY u.university_id, u.slug
+ORDER BY u.university_id;
 
-
-USE student_placement_analysis;
-
--- Run this once on an existing database. If a column already exists,
--- skip that individual ALTER TABLE statement.
-ALTER TABLE placement_submissions
-    ADD COLUMN roll_no VARCHAR(30) NULL AFTER user_id;
-
-ALTER TABLE placement_submissions
-    ADD COLUMN graduation_year YEAR NULL AFTER department;
-
-ALTER TABLE placement_submissions
-    ADD COLUMN is_eligible BOOLEAN NOT NULL DEFAULT TRUE AFTER graduation_year;
-
--- Make the fields mandatory after the existing pending rows have been reviewed
--- or backfilled. New submissions through the Flask form always provide them.
-
-
-
-
+SELECT u.slug, COUNT(p.placement_id) AS placement_count
+FROM universities u
+LEFT JOIN placements p ON p.university_id = u.university_id
+GROUP BY u.university_id, u.slug
+ORDER BY u.university_id;

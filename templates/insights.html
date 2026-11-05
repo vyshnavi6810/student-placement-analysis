@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Placement Insights</h1>
+
+<p class="muted">
+    University placement analytics based on your selected filters.
+</p>
+
+<!-- Filters -->
+<form class="filters" method="get">
+
+    <label>
+        Department
+        <select name="department">
+            <option value="">All</option>
+            {% for d in departments %}
+            <option value="{{ d.value }}"
+                {% if filters.department == d.value %}selected{% endif %}>
+                {{ d.value }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>
+        Graduation Year
+        <select name="graduation_year">
+            <option value="">All</option>
+            {% for y in years %}
+            <option value="{{ y.value }}"
+                {% if filters.graduation_year == y.value|string %}selected{% endif %}>
+                {{ y.value }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>
+        Placement Year
+        <input name="placement_year"
+               value="{{ filters.placement_year }}">
+    </label>
+
+    <label>
+        Job Role
+        <input name="role" value="{{ filters.role }}">
+    </label>
+
+    <label>
+        Company
+        <input name="company" value="{{ filters.company }}">
+    </label>
+
+    <button type="submit">Apply Filters</button>
+
+    <a class="button secondary" href="{{ request.path }}">Clear</a>
+
+</form>
+
+<!-- KPI Cards -->
+<div class="kpis">
+
+    <div>
+        <span>Total Students</span>
+        <strong>{{ data.summary.total_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placed Students</span>
+        <strong>{{ data.summary.placed_students or 0 }}</strong>
+    </div>
+
+    <div>
+        <span>Placement Rate</span>
+        <strong>{{ data.summary.placement_rate }}%</strong>
+    </div>
+
+    <div>
+        <span>Average Package</span>
+        <strong>{{ data.summary.avg_package or '—' }} LPA</strong>
+    </div>
+
+</div>
+
+<!-- Graphical Analytics -->
+<h2>Placement Analytics</h2>
+
+<div class="grid2">
+
+    <section class="panel">
+        <h3>Department Placement</h3>
+        <canvas id="studentDepartmentChart"></canvas>
+        <small>Eligible and placed students by department.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Most-Recorded Skills</h3>
+        <canvas id="studentSkillChart"></canvas>
+        <small>Skills recorded by students.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Year-wise Placement Records</h3>
+        <canvas id="studentYearChart"></canvas>
+        <small>Placement records by year.</small>
+    </section>
+
+    <section class="panel">
+        <h3>Common Placed Job Roles</h3>
+        <canvas id="studentRoleChart"></canvas>
+        <small>Most frequently recorded job roles.</small>
+    </section>
+
+</div>
+
+<!-- Analytics Data -->
+<script id="student-analytics" type="application/json">
+    {{ data | tojson }}
+</script>
+
+{% endblock %}

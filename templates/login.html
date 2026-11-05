@@ -1,71 +1,77 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Placement Analytics | Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body class="login-page">
+{% extends "base.html" %}
 
-    <main class="login-card">
+{% block content %}
 
-        <section class="login-illustration">
-            <div class="illustration-circle"></div>
-            <div class="chart-decoration">
-                <span></span><span></span><span></span><span></span>
-            </div>
+<div class="form-card login-card">
 
-            <div class="student-illustration">🎓</div>
-            <h2>Build Your Future</h2>
-            <p>Discover skills, placement trends and career opportunities.</p>
+    <p class="eyebrow">SECURE SIGN IN</p>
 
-            <div class="login-stats">
-                <span> Placement Insights</span>
-                <span> Skill Analysis</span>
-                <span> Career Growth</span>
-            </div>
-        </section>
+    <h1>{{ university or 'University' }} Portal</h1>
 
-        <section class="login-form-section">
-           
+    <p class="login-subtitle">
+        Sign in to access your placement dashboard.
+    </p>
 
-            <p class="eyebrow">STUDENT PLACEMENT ANALYTICS</p>
-            <h1>Welcome back!</h1>
-            <p class="subtitle">Sign in to access your placement dashboard.</p>
+    {% if error %}
+    <p class="notice error">{{ error }}</p>
+    {% endif %}
 
-            {% if error %}
-                <p class="login-error" role="alert">{{ error }}</p>
-            {% endif %}
+    <form method="post" class="login-form">
 
-            <form method="POST" action="{{ url_for('login') }}">
-                <label for="username">Username</label>
-                <div class="input-wrapper">
-                    <span>👤</span>
-                    <input id="username" name="username"
-                           type="text" placeholder="Enter your username"
-                           autocomplete="username" required>
-                </div>
+        <label for="username">Username</label>
+        <input
+            id="username"
+            type="text"
+            name="username"
+            placeholder="Enter your username"
+            autocomplete="username"
+            required
+        >
 
-                <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <span>🔒</span>
-                    <input id="password" name="password"
-                           type="password" placeholder="Enter your password"
-                           autocomplete="current-password" required>
-                </div>
+        <label for="password">Password</label>
 
-                <button class="login-button" type="submit">SIGN IN →</button>
-            </form>
-             <p class="login-footer">
-                    Don't have an account?
-                    <a href="{{ url_for('register') }}">Create account</a>
-            </p>
-            
-        </section>
+        <div class="password-field">
+            <input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+            >
 
-    </main>
+            <button type="button" id="togglePassword">
+                Show
+            </button>
+        </div>
 
-</body>
-</html>
+        <button type="submit" class="btn-primary">
+            Login →
+        </button>
+
+    </form>
+
+    <p class="register-link">
+        Student? <a href="{{ url_for('register') }}">Create an account</a>
+    </p>
+
+    <a class="change-university" href="{{ url_for('home') }}">
+        ← Change university
+    </a>
+
+</div>
+
+<script>
+const password = document.getElementById("password");
+const toggle = document.getElementById("togglePassword");
+
+toggle.addEventListener("click", function () {
+    const hidden = password.type === "password";
+
+    password.type = hidden ? "text" : "password";
+    toggle.textContent = hidden ? "Hide" : "Show";
+});
+</script>
+
+{% endblock %}
