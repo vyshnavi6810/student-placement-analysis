@@ -10,15 +10,24 @@ load_dotenv(BASE_DIR / ".env", override=False)
 
 
 def get_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", "16211")),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        ssl_ca=str(BASE_DIR / "ca.pem"),
-        ssl_verify_cert=True
-    )
+    ssl_ca = os.getenv("DB_SSL_CA")
+
+    connection_config = {
+        "host": os.getenv("DB_HOST"),
+        "port": int(os.getenv("DB_PORT", "16211")),
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "database": os.getenv("DB_NAME"),
+        "ssl_verify_cert": True
+    }
+
+    if ssl_ca:
+        connection_config["ssl_ca"] = ssl_ca
+    else:
+        connection_config["ssl_ca"] = str(BASE_DIR / "ca.pem")
+
+    return mysql.connector.connect(**connection_config)
+
 
 
 def run_sql_file():
